@@ -35,7 +35,7 @@ define([
     "./dimensions",                         // 元素尺寸
     "./deprecated",                         // 已弃用方法
     "./exports/amd",                        // 注册为AMD module
-    "./exports/global"                      // 注册为全局
+    "./exports/global"                      // 注册到全局
 ], function (jQuery) {
     "use strict";
     return jQuery;
