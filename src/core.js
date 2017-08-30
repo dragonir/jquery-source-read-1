@@ -1,129 +1,104 @@
-/* global Symbol */
-// Defining this global in .eslintrc.json would create a danger of using the global
-// unguarded in another place, it seems safer to define global only for this module
+/**
+ * jQuery核心
+ */
 
-define([
-    "./var/arr",
-    "./var/document",
-    "./var/getProto",
-    "./var/slice",
-    "./var/concat",
-    "./var/push",
-    "./var/indexOf",
-    "./var/class2type",
-    "./var/toString",
-    "./var/hasOwn",
-    "./var/fnToString",
-    "./var/ObjectFunctionString",
-    "./var/support",
-    "./var/isWindow",
-    "./core/DOMEval"
+define(["./var/arr", "./var/document", "./var/getProto", "./var/slice", "./var/concat", "./var/push", "./var/indexOf",
+    "./var/class2type", "./var/toString", "./var/hasOwn", "./var/fnToString", "./var/ObjectFunctionString",
+    "./var/support", "./var/isWindow", "./core/DOMEval"
 ], function (arr, document, getProto, slice, concat, push, indexOf,
              class2type, toString, hasOwn, fnToString, ObjectFunctionString,
              support, isWindow, DOMEval) {
-
     "use strict";
 
-    var
-        version = "@VERSION",
+    var version = "@VERSION";       //jQuery版本号
 
-        // Define a local copy of jQuery
-        jQuery = function (selector, context) {
+    /**
+     * jQuery工厂函数
+     * @param   selector    {selector}  选择器
+     * @param   context     {Object}    上下文对象,一般在使用jQuery构建DOM元素时使用,如:$('<h1></h1>',{"class": "title"})
+     * @returns             {*}         返回一个独立的jQuery实例
+     */
+    var jQuery = function (selector, context) {
+        //实质上是调用了init方法,每次调用构建出新的jQuery实例
+        //实现无new构建
+        return new jQuery.fn.init(selector, context);
+    };
 
-            // The jQuery object is actually just the init constructor 'enhanced'
-            // Need init if jQuery is called (just allow error to be thrown if not included)
-            return new jQuery.fn.init(selector, context);
-        },
+    var rtrim = /^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g,   //匹配BOM字符和&nbsp;
+        rmsPrefix = /^-ms-/,                            //匹配 -ms- 前缀
+        rdashAlpha = /-([a-z])/g;                       //匹配 - 后第一个字母
 
-        // Support: Android <=4.0 only
-        // Make sure we trim BOM and NBSP
-        rtrim = /^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g,
+    //$.camelCase的callback
+    var fcamelCase = function (all, letter) {
+        return letter.toUpperCase();
+    };
 
-        // Matches dashed string for camelizing
-        rmsPrefix = /^-ms-/,
-        rdashAlpha = /-([a-z])/g,
-
-        // Used by jQuery.camelCase as callback to replace()
-        fcamelCase = function (all, letter) {
-            return letter.toUpperCase();
-        };
-
+    //jQuery对象原型
     jQuery.fn = jQuery.prototype = {
-
-        // The current version of jQuery being used
         jquery: version,
-
         constructor: jQuery,
-
-        // The default length of a jQuery object is 0
         length: 0,
 
+        //返回一个包含jQuery对象集合中的所有DOM元素的数组
         toArray: function () {
             return slice.call(this);
         },
 
-        // Get the Nth element in the matched element set OR
-        // Get the whole matched element set as a clean array
+        //获取集合中的第num个元素
         get: function (num) {
-
-            // Return all the elements in a clean array
             if (num == null) {
-                return slice.call(this);
+                return slice.call(this);        //当num为null时,行为与$.toArray相同
             }
-
-            // Return just the one element from the set
+            //从集合中返回一个元素
             return num < 0 ? this[num + this.length] : this[num];
         },
 
-        // Take an array of elements and push it onto the stack
-        // (returning the new matched element set)
+        //将一组DOM元素添加到jQuery集合中,并返回新的jQuery对象
         pushStack: function (elems) {
-
-            // Build a new jQuery matched element set
-            var ret = jQuery.merge(this.constructor(), elems);
-
-            // Add the old object onto the stack (as a reference)
-            ret.prevObject = this;
-
-            // Return the newly-formed element set
+            var ret = jQuery.merge(this.constructor(), elems);      //创建新的集合
+            ret.prevObject = this;                                  //将原对象添加到新的集合中
             return ret;
         },
 
-        // Execute a callback for every element in the matched set.
+        //遍历jQuery对象，为每个匹配元素执行一个函数
         each: function (callback) {
             return jQuery.each(this, callback);
         },
 
+        //通过一个函数匹配当前集合中的每个元素,产生一个包含新的jQuery对象
         map: function (callback) {
             return this.pushStack(jQuery.map(this, function (elem, i) {
                 return callback.call(elem, i, elem);
             }));
         },
 
+        //根据指定的下标范围，过滤匹配的元素集合，并生成一个新的 jQuery 对象
         slice: function () {
             return this.pushStack(slice.apply(this, arguments));
         },
 
+        //第一个元素
         first: function () {
             return this.eq(0);
         },
 
+        //最后一个元素
         last: function () {
             return this.eq(-1);
         },
 
+        //第i个元素
         eq: function (i) {
             var len = this.length,
                 j = +i + ( i < 0 ? len : 0 );
             return this.pushStack(j >= 0 && j < len ? [this[j]] : []);
         },
 
+        //终止在当前链的最新过滤操作，并返回匹配的元素的以前状态
         end: function () {
             return this.prevObject || this.constructor();
         },
 
-        // For internal use only.
-        // Behaves like an Array's method, not like a jQuery method.
         push: push,
         sort: arr.sort,
         splice: arr.splice
