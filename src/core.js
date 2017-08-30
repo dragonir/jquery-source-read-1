@@ -28,7 +28,7 @@ define(["./var/arr", "./var/document", "./var/getProto", "./var/slice", "./var/c
         rmsPrefix = /^-ms-/,                            //匹配 -ms- 前缀
         rdashAlpha = /-([a-z])/g;                       //匹配 - 后第一个字母
 
-    //$.camelCase的callback
+    //$.camelCase的callback,用于字母小写转大写
     var fcamelCase = function (all, letter) {
         return letter.toUpperCase();
     };
@@ -39,24 +39,32 @@ define(["./var/arr", "./var/document", "./var/getProto", "./var/slice", "./var/c
         constructor: jQuery,
         length: 0,
 
+        /*
+        * jQuery原型上的各方法实现的核心是jQuery对象是一个类数组的对象
+        * 可对其进行一些数组操作
+        */
+
         //返回一个包含jQuery对象集合中的所有DOM元素的数组
         toArray: function () {
             return slice.call(this);
         },
 
         //获取集合中的第num个元素
+        //[注] get方法返回的是DOM元素
         get: function (num) {
             if (num == null) {
                 return slice.call(this);        //当num为null时,行为与$.toArray相同
             }
-            //从集合中返回一个元素
+            //从集合中返回一个DOM元素
             return num < 0 ? this[num + this.length] : this[num];
         },
 
-        //将一组DOM元素添加到jQuery集合中,并返回新的jQuery对象
+        //将传入的DOM元素构建为一个新的jQuery实例
         pushStack: function (elems) {
-            var ret = jQuery.merge(this.constructor(), elems);      //创建新的集合
-            ret.prevObject = this;                                  //将原对象添加到新的集合中
+            //this.constructor() === $(),此处调用构造函数,得到一个新的jQuery实例
+            //再使用merge方法将传入的DOM元素合并到新的实例中
+            var ret = jQuery.merge(this.constructor(), elems);
+            ret.prevObject = this;          //将原实例存到新实例的prevObject属性中
             return ret;
         },
 

@@ -5,11 +5,15 @@
     <script src="./external/requirejs/require.js"></script>
 </head>
 <body>
+    <h1>No.1</h1>
+    <h1>No.2</h1>
+    <h1>No.3</h1>
+    <h2>H2.1</h2>
     <script>
         require.config({baseUrl: './src/'});
         require(['jquery'], function ($) {
-            var temp = $('<h1></h1>', {"class": "title"});
-            console.log(temp);
+            var temp = $('h1');
+            var temp2 = temp.pushStack($('h2'));
         });
     </script>
 </body>
