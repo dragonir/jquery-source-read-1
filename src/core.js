@@ -34,15 +34,11 @@ define(["./var/arr", "./var/document", "./var/getProto", "./var/slice", "./var/c
     };
 
     //jQuery对象原型
+    //jQuery原型上的各方法实现的核心是jQuery对象是一个类数组的对象,可对其进行一些数组操作
     jQuery.fn = jQuery.prototype = {
         jquery: version,
         constructor: jQuery,
         length: 0,
-
-        /*
-        * jQuery原型上的各方法实现的核心是jQuery对象是一个类数组的对象
-        * 可对其进行一些数组操作
-        */
 
         //返回一个包含jQuery对象集合中的所有DOM元素的数组
         toArray: function () {
@@ -50,7 +46,7 @@ define(["./var/arr", "./var/document", "./var/getProto", "./var/slice", "./var/c
         },
 
         //获取集合中的第num个元素
-        //[注] get方法返回的是DOM元素
+        //[注] get方法返回的是DOM元素对象,而非jQuery对象
         get: function (num) {
             if (num == null) {
                 return slice.call(this);        //当num为null时,行为与$.toArray相同
@@ -59,25 +55,29 @@ define(["./var/arr", "./var/document", "./var/getProto", "./var/slice", "./var/c
             return num < 0 ? this[num + this.length] : this[num];
         },
 
-        //将传入的DOM元素构建为一个新的jQuery实例
+        //将传入的元素构建为一个新的jQuery实例
         pushStack: function (elems) {
             //this.constructor() === $(),此处调用构造函数,得到一个新的jQuery实例
-            //再使用merge方法将传入的DOM元素合并到新的实例中
+            //再使用merge方法将传入的元素合并到新的实例中
             var ret = jQuery.merge(this.constructor(), elems);
             ret.prevObject = this;          //将原实例存到新实例的prevObject属性中
             return ret;
         },
 
-        //遍历jQuery对象，为每个匹配元素执行一个函数
+        //遍历jQuery实例，为每个匹配元素执行一个函数
         each: function (callback) {
             return jQuery.each(this, callback);
         },
 
-        //通过一个函数匹配当前集合中的每个元素,产生一个包含新的jQuery对象
+        //通过一个函数匹配当前集合中的元素,返回一个包含匹配集合的jQuery实例
         map: function (callback) {
-            return this.pushStack(jQuery.map(this, function (elem, i) {
+            //[重写] 此处重写了一下,增加了中间变量,以方便理解
+            var elems = jQuery.map(this, function (elem, i) {
+                //通过call改变callback的调用者,使得callback中的this指向elem
                 return callback.call(elem, i, elem);
-            }));
+            });
+
+            return this.pushStack(elems);
         },
 
         //根据指定的下标范围，过滤匹配的元素集合，并生成一个新的 jQuery 对象
