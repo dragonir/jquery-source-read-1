@@ -71,18 +71,20 @@ define(["./var/arr", "./var/document", "./var/getProto", "./var/slice", "./var/c
 
         //通过一个函数匹配当前集合中的元素,返回一个包含匹配集合的jQuery实例
         map: function (callback) {
-            //[重写] 此处重写了一下,增加了中间变量,以方便理解
+            //[重写] 增加中间变量,以方便理解
             var elems = jQuery.map(this, function (elem, i) {
                 //通过call改变callback的调用者,使得callback中的this指向elem
                 return callback.call(elem, i, elem);
             });
-
             return this.pushStack(elems);
         },
 
-        //根据指定的下标范围，过滤匹配的元素集合，并生成一个新的 jQuery 对象
+        //根据指定的下标范围，过滤匹配的元素集合，并返回一个新的jQuery实例
         slice: function () {
-            return this.pushStack(slice.apply(this, arguments));
+            //[重写] 增加中间变量
+            //利用Array.slice,得到一个DOM数组
+            var elems = slice.apply(this, arguments);
+            return this.pushStack(elems);
         },
 
         //第一个元素
@@ -95,15 +97,19 @@ define(["./var/arr", "./var/document", "./var/getProto", "./var/slice", "./var/c
             return this.eq(-1);
         },
 
-        //第i个元素
+        //返回一个只包含第i个元素的jQuery实例
         eq: function (i) {
+            //[重写] 让j的取值过程更易读
             var len = this.length,
-                j = +i + ( i < 0 ? len : 0 );
-            return this.pushStack(j >= 0 && j < len ? [this[j]] : []);
+                j = i < 0 ? i + len : i;
+
+            var elems = (j >= 0 && j < len) ? [this[j]] : [];
+            return this.pushStack(elems);
         },
 
-        //终止在当前链的最新过滤操作，并返回匹配的元素的以前状态
+        //返回jQuery实例以前状态
         end: function () {
+            //this.pervObject中存储的是实例的上一个状态
             return this.prevObject || this.constructor();
         },
 
