@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <script src="./external/requirejs/require.js"></script>
+</head>
+<body>
+    <script>
+        require.config({baseUrl: './src/'});
+        require(['jquery'], function ($) {
+            console.log($);
+        });
+    </script>
+</body>
+</html>
