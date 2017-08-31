@@ -12,7 +12,8 @@
     <script>
         require.config({baseUrl: './src/'});
         require(['jquery'], function ($) {
-            $("<h1></h1>", {"class": "title"});
+            var temp = $('#h1');
+            $(".title", temp);
         });
     </script>
 </body>

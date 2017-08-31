@@ -43,8 +43,8 @@ define(["../core", "../var/document", "./var/rsingleTag", "../traversing/findFil
                 match = rquickExpr.exec(selector);
             }
 
-            //HTML tag的处理,当执行此分支时,match[1]一般为HTML字符串
             if (match && ( match[1] || !context )) {
+                //HTML tag的处理,当执行此分支时,match[1]一般为HTML字符串
                 if (match[1]) {
                     //当传入的上下文为jQuery实例时,使用其中的第0个元素
                     //否则直接使用此对象
@@ -77,8 +77,8 @@ define(["../core", "../var/document", "./var/rsingleTag", "../traversing/findFil
                     }
                     return this;
 
-                } else {
                     //#id的处理,当执行此分支时,match[2]为id值
+                } else {
                     elem = document.getElementById(match[2]);           //调用原生DOM方法,获取元素
 
                     if (elem) {
@@ -88,24 +88,25 @@ define(["../core", "../var/document", "./var/rsingleTag", "../traversing/findFil
                     return this;
                 }
 
-                // HANDLE: $(expr, $(...))
+                //当执行这两个分支时,说明selector不是#id或者HTML tag形式
             } else if (!context || context.jquery) {
+                //当context存在,且context是jQuery实例,则执行content.find(selector)
+                //当context不存在,则执行root.find(selector)
+                //root一般情况下为$(document)
                 return ( context || root ).find(selector);
 
-                // HANDLE: $(expr, context)
-                // (which is just equivalent to: $(context).find(expr)
             } else {
+                //当context存在,且不是jQuery实例
+                //则利用context构建一个新的jQuery实例,再执行find方法
                 return this.constructor(context).find(selector);
             }
 
-            // HANDLE: $(DOMElement)
+            //当selector为DOM节点时, 行为类似于#id的处理方式
         } else if (selector.nodeType) {
             this[0] = selector;
             this.length = 1;
             return this;
 
-            // HANDLE: $(function)
-            // Shortcut for document ready
         } else if (jQuery.isFunction(selector)) {
             return root.ready !== undefined ?
                 root.ready(selector) :
