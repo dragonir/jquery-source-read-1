@@ -202,12 +202,10 @@ define(["./var/arr", "./var/document", "./var/getProto", "./var/slice", "./var/c
         noop: function () {
         },
 
+        //判断是否为一个函数
         isFunction: function (obj) {
-
-            // Support: Chrome <=57, Firefox <=52
-            // In some browsers, typeof returns "function" for HTML <object> elements
-            // (i.e., `typeof document.createElement( "object" ) === "function"`).
-            // We don't want to classify *any* DOM node as a function.
+            //在某些浏览器中,使用typeof判断DOM元素时也会返回 "function"
+            //所以需要再判断一次obj.nodeType属性
             return typeof obj === "function" && typeof obj.nodeType !== "number";
         },
 

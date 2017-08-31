@@ -36,7 +36,7 @@ define(["../core", "../var/document", "./var/rsingleTag", "../traversing/findFil
             } else {
                 /*
                 * 这里正则匹配可能有三种结果
-                * 1. 当selector为包含HTML标签的字符串时,结果为[selector, 过滤后的selector, null]
+                * 1. 当selector为包含HTML标签的字符串时,结果为[selector, HTML, null]
                 * 2. 当selector为#id的形式时,结果为[selecor, null, id]
                 * 3. 其他形式结果为null
                 */
@@ -45,38 +45,40 @@ define(["../core", "../var/document", "./var/rsingleTag", "../traversing/findFil
 
             //HTML tag的处理,当执行此分支时,match[1]一般为HTML字符串
             if (match && ( match[1] || !context )) {
-
-                // HANDLE: $(html) -> $(array)
                 if (match[1]) {
+                    //当传入的上下文为jQuery实例时,使用其中的第0个元素
+                    //否则直接使用此对象
                     context = context instanceof jQuery ? context[0] : context;
 
-                    // Option to run scripts is true for back-compat
-                    // Intentionally let the error be thrown if parseHTML is not present
-                    jQuery.merge(this, jQuery.parseHTML(
-                        match[1],
-                        context && context.nodeType ? context.ownerDocument || context : document,
-                        true
-                    ));
+                    //[重写] 增加中间变量
 
-                    // HANDLE: $(html, props)
+                    //返回根节点文档对象,即document对象
+                    var tempContext = context && context.nodeType ?
+                        context.ownerDocument || context :
+                        document;
+
+                    //调用parseHTML,将HTML字符串转为一组DOM元素
+                    var tempHTML = jQuery.parseHTML(match[1], tempContext, true);
+
+                    //合并到合集
+                    jQuery.merge(this, tempHTML);
+
+                    //当context是一个普通对象时,如$('<h1></h1>',{"class": "title"})
                     if (rsingleTag.test(match[1]) && jQuery.isPlainObject(context)) {
                         for (match in context) {
-
-                            // Properties of context are called as methods if possible
                             if (jQuery.isFunction(this[match])) {
+                                //如果属性是jQuery的方法. 执行方法,并将context中的同名属性作为参数传入
                                 this[match](context[match]);
-
-                                // ...and otherwise set as attributes
                             } else {
+                                //若不是方法,则设置属性
                                 this.attr(match, context[match]);
                             }
                         }
                     }
-
                     return this;
 
-                    //#id的处理,当执行此分支时,match[2]为id值
                 } else {
+                    //#id的处理,当执行此分支时,match[2]为id值
                     elem = document.getElementById(match[2]);           //调用原生DOM方法,获取元素
 
                     if (elem) {
