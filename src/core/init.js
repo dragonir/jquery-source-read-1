@@ -11,34 +11,39 @@ define(["../core", "../var/document", "./var/rsingleTag", "../traversing/findFil
 
     /***
      * init方法
-     *
+     * @param   selector    {selector}  选择器
+     * @param   context     {Object}    上下文对象
+     * @param   root        {jQuery}    备用的rootjQuery
+     * @returns             {*}         jQuery实例
      */
     var init = jQuery.fn.init = function (selector, context, root) {
-        var match, elem;
+        var match,              //匹配模式
+            elem;               //匹配到的元素
 
-        // HANDLE: $(""), $(null), $(undefined), $(false)
+        //选择器为("" | null | undefined | false)时
         if (!selector) {
             return this;
         }
 
-        // Method init() accepts an alternate rootjQuery
-        // so migrate can support jQuery.sub (gh-2101)
+        //备用的rootjQuery
         root = root || rootjQuery;
 
-        // Handle HTML strings
+        //进入字符串解析
         if (typeof selector === "string") {
-            if (selector[0] === "<" &&
-                selector[selector.length - 1] === ">" &&
-                selector.length >= 3) {
-
-                // Assume that strings that start and end with <> are HTML and skip the regex check
+            //这里假设以<>开始结束的字符串都是HTML,当符合条件时跳过正则检查
+            if (selector[0] === "<" && selector[selector.length - 1] === ">" && selector.length >= 3) {
                 match = [null, selector, null];
-
             } else {
+                /*
+                * 这里正则匹配可能有三种结果
+                * 1. 当selector为包含HTML标签的字符串时,结果为[selector, 过滤后的selector, null]
+                * 2. 当selector为#id的形式时,结果为[selecor, null, id]
+                * 3. 其他形式结果为null
+                */
                 match = rquickExpr.exec(selector);
             }
 
-            // Match html or make sure no context is specified for #id
+            //HTML tag的处理,当执行此分支时,match[1]一般为HTML字符串
             if (match && ( match[1] || !context )) {
 
                 // HANDLE: $(html) -> $(array)
@@ -70,14 +75,12 @@ define(["../core", "../var/document", "./var/rsingleTag", "../traversing/findFil
 
                     return this;
 
-                    // HANDLE: $(#id)
+                    //#id的处理,当执行此分支时,match[2]为id值
                 } else {
-                    elem = document.getElementById(match[2]);
+                    elem = document.getElementById(match[2]);           //调用原生DOM方法,获取元素
 
                     if (elem) {
-
-                        // Inject the element directly into the jQuery object
-                        this[0] = elem;
+                        this[0] = elem;                                 //将获取的元素加入集合中
                         this.length = 1;
                     }
                     return this;
