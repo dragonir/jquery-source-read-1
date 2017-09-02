@@ -15,7 +15,7 @@ define(["./var/arr", "./var/document", "./var/getProto", "./var/slice", "./var/c
     /**
      * jQuery工厂函数
      * @param   selector    {selector}  选择器
-     * @param   context     {Object}    上下文对象,一般在使用jQuery构建DOM元素时使用,如:$('<h1></h1>',{"class": "title"})
+     * @param   context     {Object}    上下文对象
      * @returns             {*}         返回一个独立的jQuery实例
      */
     var jQuery = function (selector, context) {
@@ -204,7 +204,7 @@ define(["./var/arr", "./var/document", "./var/getProto", "./var/slice", "./var/c
 
         //判断是否为一个函数
         isFunction: function (obj) {
-            //在某些浏览器中,使用typeof判断DOM元素时也会返回 "function"
+            //在某些浏览器中,使用typeof判断DOM对象时也会返回 "function"
             //所以需要再判断一次obj.nodeType属性
             return typeof obj === "function" && typeof obj.nodeType !== "number";
         },

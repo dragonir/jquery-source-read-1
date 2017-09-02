@@ -96,7 +96,7 @@ define(["../core", "../var/document", "./var/rsingleTag", "../traversing/findFil
                 return ( context || root ).find(selector);
 
             } else {
-                //当context存在,且不是jQuery实例
+                //当context存在但不是jQuery实例
                 //则利用context构建一个新的jQuery实例,再执行find方法
                 return this.constructor(context).find(selector);
             }
@@ -107,23 +107,20 @@ define(["../core", "../var/document", "./var/rsingleTag", "../traversing/findFil
             this.length = 1;
             return this;
 
+            //当selector为函数时,如$(function(){})
         } else if (jQuery.isFunction(selector)) {
-            return root.ready !== undefined ?
-                root.ready(selector) :
-
-                // Execute immediately if ready is not present
-                selector(jQuery);
+            return root.ready !== undefined ?               //判断ready方法是否存在
+                root.ready(selector) :                      //若存在,则将函数加入ready队列
+                selector(jQuery);                           //若不存在,则立即执行该函数
         }
 
+        //当selector不进入以上分支时,说明selector是一个jQuery实例
+        //返回这个jQuery实例的浅拷贝
         return jQuery.makeArray(selector, this);
     };
 
-// Give the init function the jQuery prototype for later instantiation
-    init.prototype = jQuery.fn;
-
-// Initialize central reference
-    rootjQuery = jQuery(document);
+    init.prototype = jQuery.fn;             //使init方法创建的对象能够使用jQuery原型上的方法
+    rootjQuery = jQuery(document);          //将rootjQuery指向$(document)
 
     return init;
-
 });
