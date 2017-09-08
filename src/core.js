@@ -118,51 +118,59 @@ define(["./var/arr", "./var/document", "./var/getProto", "./var/slice", "./var/c
         splice: arr.splice
     };
 
+    /**
+     * 用于拓展jQuery或合并对象
+     * @param   deep        {Boolean}   是否进行深拷贝
+     * @param   target      {Object}    目标对象
+     * @param   object      {Object}    源对象
+     *
+     * 当只有target为唯一参数时,将其作为源对象,用于拓展jQuery
+     * 利用JS中this永远指向调用者的特性,当调用$.fn.extend时,将拓展jQuery原型
+     */
     jQuery.extend = jQuery.fn.extend = function () {
-        var options, name, src, copy, copyIsArray, clone,
-            target = arguments[0] || {},
-            i = 1,
-            length = arguments.length,
-            deep = false;
+        //[重写] 修改了变量定义的位置,方便阅读
 
-        // Handle a deep copy situation
+        var target = arguments[0] || {},                //目标对象
+            length = arguments.length,                  //参数数量
+            deep = false,                               //深拷贝标记
+            i = 1;                                      //第一个源对象在arguments中的位置
+
+        //利用typeof实现方法重载
         if (typeof target === "boolean") {
-            deep = target;
-
-            // Skip the boolean and the target
-            target = arguments[i] || {};
-            i++;
+            deep = target;                      //修改深拷贝标记
+            target = arguments[i] || {};        //修改目标对象引用
+            i++;                                //位置后移
         }
 
-        // Handle case when target is a string or something (possible in deep copy)
+        //当目标不是对象或函数时
         if (typeof target !== "object" && !jQuery.isFunction(target)) {
-            target = {};
+            target = {};                        //目标指向一个空对象
         }
 
-        // Extend jQuery itself if only one argument is passed
+        //当只传入一个对象时,则拓展jQuery自身
         if (i === length) {
-            target = this;
-            i--;
+            target = this;          //目标指向调用者
+            i--;                    //位置前移
         }
 
+        var copyIsArray, clone;
+
+        //开始进行拷贝
         for (; i < length; i++) {
+            var options = arguments[i];             //源对象
 
-            // Only deal with non-null/undefined values
-            if (( options = arguments[i] ) != null) {
+            if (options != null) {
+                for (var name in options) {
+                    var src = target[name];         //目标属性
+                    var copy = options[name];       //源属性
 
-                // Extend the base object
-                for (name in options) {
-                    src = target[name];
-                    copy = options[name];
-
-                    // Prevent never-ending loop
+                    //当嵌套数组或对象深拷贝完成时,跳出此次循环
                     if (target === copy) {
                         continue;
                     }
 
-                    // Recurse if we're merging plain objects or arrays
-                    if (deep && copy && ( jQuery.isPlainObject(copy) ||
-                            ( copyIsArray = Array.isArray(copy) ) )) {
+                    //深拷贝, 当源对象中嵌套有数组或对象
+                    if (deep && copy && (jQuery.isPlainObject(copy) || (copyIsArray = Array.isArray(copy)))) {
 
                         if (copyIsArray) {
                             copyIsArray = false;
@@ -223,24 +231,27 @@ define(["./var/arr", "./var/document", "./var/getProto", "./var/slice", "./var/c
                 !isNaN(obj - parseFloat(obj));
         },
 
+        //判断对象是否是纯粹的对象(通过new Object或者{}创建)
         isPlainObject: function (obj) {
-            var proto, Ctor;
-
-            // Detect obvious negatives
-            // Use toString instead of jQuery.type to catch host objects
+            //toString.call等同于Object.prototype.toString
             if (!obj || toString.call(obj) !== "[object Object]") {
                 return false;
             }
 
-            proto = getProto(obj);
+            //getProto等同于Object.getPrototypeOf
+            var proto = getProto(obj);              //对象的原型
 
-            // Objects with no prototype (e.g., `Object.create( null )`) are plain
+            //没有原型的对象
             if (!proto) {
                 return true;
             }
 
-            // Objects with prototype are plain iff they were constructed by a global Object function
-            Ctor = hasOwn.call(proto, "constructor") && proto.constructor;
+            //hasOwn等同于Object.hasOwnProperty
+            var Ctor = hasOwn.call(proto, "constructor") && proto.constructor;      //得到对象原型的构造器
+
+            //fnToString等同于Function.toString
+            //ObjectFunctionString === Object函数
+            //此处判断构造器是否为Object函数,来确定是否为存粹的对象
             return typeof Ctor === "function" && fnToString.call(Ctor) === ObjectFunctionString;
         },
 

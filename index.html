@@ -10,9 +10,23 @@
     <h1 id="h3">No.3</h1>
 
     <script>
+        var obj = {
+            name: "Hello",
+            getName: function(){
+                return this.name;
+            },
+            child:{
+                age: 12,
+                test: "11111"
+            }
+        };
+        var target = {};
+
         require.config({baseUrl: './src/'});
         require(['jquery'], function ($) {
-            $("#h1");
+//            $.extend(obj, target);
+//            console.log(target);
+            $.isPlainObject({});
         });
     </script>
 </body>
