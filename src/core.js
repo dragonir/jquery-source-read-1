@@ -149,11 +149,9 @@ define(["./var/arr", "./var/document", "./var/getProto", "./var/slice", "./var/c
 
         //当只传入一个对象时,则拓展jQuery自身
         if (i === length) {
-            target = this;          //目标指向调用者
+            target = this;          //目标指向调用者, $或者$.fn
             i--;                    //位置前移
         }
-
-        var copyIsArray, clone;
 
         //开始进行拷贝
         for (; i < length; i++) {
@@ -169,30 +167,30 @@ define(["./var/arr", "./var/document", "./var/getProto", "./var/slice", "./var/c
                         continue;
                     }
 
-                    //深拷贝, 当源对象中嵌套有数组或对象
-                    if (deep && copy && (jQuery.isPlainObject(copy) || (copyIsArray = Array.isArray(copy)))) {
+                    var copyIsArray = Array.isArray(copy);
+                    var clone;
 
-                        if (copyIsArray) {
+                    //深拷贝, 当源对象中嵌套有数组或对象
+                    if (deep && copy && (jQuery.isPlainObject(copy) || copyIsArray)) {
+                        if (copyIsArray) {          //数组拷贝
                             copyIsArray = false;
                             clone = src && Array.isArray(src) ? src : [];
-
-                        } else {
+                        } else {                    //对象拷贝
                             clone = src && jQuery.isPlainObject(src) ? src : {};
                         }
 
-                        // Never move original objects, clone them
+                        //递归调用完成深拷贝
                         target[name] = jQuery.extend(deep, clone, copy);
 
-                        // Don't bring in undefined values
+                        //对于基础数据类型或者非深拷贝的场景
                     } else if (copy !== undefined) {
-                        target[name] = copy;
+                        target[name] = copy;            //拷贝覆盖
                     }
                 }
             }
         }
 
-        // Return the modified object
-        return target;
+        return target;      //返回修改后的对象
     };
 
     jQuery.extend({

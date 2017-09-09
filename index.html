@@ -10,23 +10,30 @@
     <h1 id="h3">No.3</h1>
 
     <script>
-        var obj = {
-            name: "Hello",
-            getName: function(){
-                return this.name;
-            },
-            child:{
-                age: 12,
-                test: "11111"
-            }
-        };
-        var target = {};
-
         require.config({baseUrl: './src/'});
         require(['jquery'], function ($) {
-//            $.extend(obj, target);
-//            console.log(target);
-            $.isPlainObject({});
+            var target = {
+                name: "Hello",
+                arr1: [0, 1, 2, 3, 4, 5],
+                child: {
+                    age: 12,
+                    test: "Hello"
+                }
+            };
+            var sources = {
+                name: "Hello",
+                arr1: [0, 1, 2, 3, 4, 5],
+                arr2: ['1', '2', '3', '4', '5'],
+                child: {
+                    age: 15
+                },
+                child1: {
+                    test: "12312312"
+                }
+            };
+
+            $.extend(true, target, sources);
+            console.log(target);
         });
     </script>
 </body>
