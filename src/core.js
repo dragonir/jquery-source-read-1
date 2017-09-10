@@ -193,43 +193,37 @@ define(["./var/arr", "./var/document", "./var/getProto", "./var/slice", "./var/c
         return target;      //返回修改后的对象
     };
 
+    //jQuery工具方法
     jQuery.extend({
+        expando: "jQuery" + ( version + Math.random() ).replace(/\D/g, ""),     //随机生成唯一标识符
+        isReady: true,              //加载完成状态标识
 
-        // Unique for each copy of jQuery on the page
-        expando: "jQuery" + ( version + Math.random() ).replace(/\D/g, ""),
-
-        // Assume jQuery is ready without the ready module
-        isReady: true,
-
+        //接受一个字符串，并抛出包含这个字符串的异常
         error: function (msg) {
             throw new Error(msg);
         },
 
+        //空函数
         noop: function () {
         },
 
-        //判断是否为一个函数
+        //检查是否为一个函数
         isFunction: function (obj) {
             //在某些浏览器中,使用typeof判断DOM对象时也会返回 "function"
             //所以需要再判断一次obj.nodeType属性
             return typeof obj === "function" && typeof obj.nodeType !== "number";
         },
 
+        //检查是否为一个数字
         isNumeric: function (obj) {
-
-            // As of jQuery 3.0, isNumeric is limited to
-            // strings and numbers (primitives or objects)
-            // that can be coerced to finite numbers (gh-2662)
             var type = jQuery.type(obj);
-            return ( type === "number" || type === "string" ) &&
 
-                // parseFloat NaNs numeric-cast false positives ("")
-                // ...but misinterprets leading-number strings, particularly hex literals ("0x...")
-                // subtraction forces infinities to NaN
+            return ( type === "number" || type === "string" ) &&
+                //排除掉不能完整转换为数字的字符串
                 !isNaN(obj - parseFloat(obj));
         },
 
-        //判断对象是否是纯粹的对象(通过new Object或者{}创建)
+        //检查是否是纯粹的对象(通过new Object或者{}创建)
         isPlainObject: function (obj) {
             //toString.call等同于Object.prototype.toString
             if (!obj || toString.call(obj) !== "[object Object]") {
@@ -253,37 +247,32 @@ define(["./var/arr", "./var/document", "./var/getProto", "./var/slice", "./var/c
             return typeof Ctor === "function" && fnToString.call(Ctor) === ObjectFunctionString;
         },
 
+        //检查是否是空对象
         isEmptyObject: function (obj) {
-
-            /* eslint-disable no-unused-vars */
-            // See https://github.com/eslint/eslint/issues/6125
-            var name;
-
-            for (name in obj) {
+            for (var name in obj) {
                 return false;
             }
             return true;
         },
 
+        //返回参数的类型
         type: function (obj) {
+            //null和undefined的处理
             if (obj == null) {
                 return obj + "";
             }
 
-            // Support: Android <=2.3 only (functionish RegExp)
             return typeof obj === "object" || typeof obj === "function" ?
-                class2type[toString.call(obj)] || "object" :
-                typeof obj;
+                class2type[toString.call(obj)] || "object" :            //得到具体的对象类型
+                typeof obj;                                             //基础数据类型
         },
 
-        // Evaluates a script in a global context
+        //在全局上下文中执行一段JS代码
         globalEval: function (code) {
             DOMEval(code);
         },
 
-        // Convert dashed to camelCase; used by the css and data modules
-        // Support: IE <=9 - 11, Edge 12 - 15
-        // Microsoft forgot to hump their vendor prefix (#9572)
+        //将字符串转换为小驼峰写法,主要应用于对CSS属性的处理
         camelCase: function (string) {
             return string.replace(rmsPrefix, "ms-").replace(rdashAlpha, fcamelCase);
         },
