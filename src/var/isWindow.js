@@ -1,3 +1,7 @@
+/**
+ * 检查对象是否是window对象
+ */
+
 define(function () {
     "use strict";
 

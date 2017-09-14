@@ -277,18 +277,19 @@ define(["./var/arr", "./var/document", "./var/getProto", "./var/slice", "./var/c
             return string.replace(rmsPrefix, "ms-").replace(rdashAlpha, fcamelCase);
         },
 
+        //通用的迭代函数
         each: function (obj, callback) {
-            var length, i = 0;
+            var i;
 
-            if (isArrayLike(obj)) {
-                length = obj.length;
-                for (; i < length; i++) {
+            if (isArrayLike(obj)) {                 //数组或类数组对象
+                var length = obj.length;
+                for (i = 0; i < length; i++) {      //通过length遍历
                     if (callback.call(obj[i], i, obj[i]) === false) {
                         break;
                     }
                 }
-            } else {
-                for (i in obj) {
+            } else {                                //非数组或类数组对象
+                for (i in obj) {                    //通过key遍历
                     if (callback.call(obj[i], i, obj[i]) === false) {
                         break;
                     }
@@ -298,157 +299,134 @@ define(["./var/arr", "./var/document", "./var/getProto", "./var/slice", "./var/c
             return obj;
         },
 
-        // Support: Android <=4.0 only
+        //去掉字符串头尾的空格
         trim: function (text) {
-            return text == null ?
-                "" :
-                ( text + "" ).replace(rtrim, "");
+            return text == null ? "" : ( text + "" ).replace(rtrim, "");
         },
 
-        // results is for internal usage only
+        //将类数组对象转为Array
         makeArray: function (arr, results) {
             var ret = results || [];
 
             if (arr != null) {
+                //数组或类数组对象时
                 if (isArrayLike(Object(arr))) {
-                    jQuery.merge(ret,
-                        typeof arr === "string" ?
-                            [arr] : arr
-                    );
+                    //字符串也属于类数组对象
+                    //若直接调用merge进行合并,字符串会被按字符拆分
+                    var makeArrayTemp = typeof arr === "string" ? [arr] : arr;
+                    jQuery.merge(ret, makeArrayTemp);           //合并数组
                 } else {
-                    push.call(ret, arr);
+                    push.call(ret, arr);            //对于其他类型的数据,直接push到ret中
                 }
             }
-
             return ret;
         },
 
+        //在数组中查找值并返回它的索引
         inArray: function (elem, arr, i) {
             return arr == null ? -1 : indexOf.call(arr, elem, i);
         },
 
-        // Support: Android <=4.0 only, PhantomJS 1 only
-        // push.apply(_, arraylike) throws on ancient WebKit
+        //合并两个数组内容到第一个数组
         merge: function (first, second) {
-            var len = +second.length,
-                j = 0,
+            var len = second.length,
                 i = first.length;
 
-            for (; j < len; j++) {
+            for (var j = 0; j < len; j++) {
                 first[i++] = second[j];
             }
 
             first.length = i;
-
             return first;
         },
 
+        //查找满足过滤函数条件的数组元素
+        //invert参数为true时将倒置通过的条件,即callback返回为false是才加入结果集中
         grep: function (elems, callback, invert) {
-            var callbackInverse,
-                matches = [],
-                i = 0,
-                length = elems.length,
-                callbackExpect = !invert;
+            var matches = [],
+                length = elems.length;
 
-            // Go through the array, only saving the items
-            // that pass the validator function
-            for (; i < length; i++) {
-                callbackInverse = !callback(elems[i], i);
-                if (callbackInverse !== callbackExpect) {
+            for (var i = 0; i < length; i++) {
+                if (callback(elems[i], i) === !invert) {
                     matches.push(elems[i]);
                 }
             }
-
             return matches;
         },
 
-        // arg is for internal usage only
+        //将一个数组中的所有元素转换到另一个数组中
         map: function (elems, callback, arg) {
-            var length, value,
-                i = 0,
-                ret = [];
+            var value, i, ret = [];
 
-            // Go through the array, translating each of the items to their new values
-            if (isArrayLike(elems)) {
-                length = elems.length;
-                for (; i < length; i++) {
+            if (isArrayLike(elems)) {                       //数组或类数组对象
+                var length = elems.length;
+                for (i = 0; i < length; i++) {              //通过length遍历
                     value = callback(elems[i], i, arg);
-
                     if (value != null) {
                         ret.push(value);
                     }
                 }
-
-                // Go through every key on the object,
-            } else {
-                for (i in elems) {
+            } else {                                        //非数组或类数组对象
+                for (i in elems) {                          //通过key遍历
                     value = callback(elems[i], i, arg);
-
                     if (value != null) {
                         ret.push(value);
                     }
                 }
             }
 
-            // Flatten any nested arrays
-            return concat.apply([], ret);
+            return concat.apply([], ret);                   //平铺嵌套数组
         },
 
-        // A global GUID counter for objects
-        guid: 1,
+        guid: 1,        //全局GUID计数器
 
-        // Bind a function to a context, optionally partially applying any
-        // arguments.
+        //返回一个新函数并将其内部的this指向context
         proxy: function (fn, context) {
-            var tmp, args, proxy;
-
+            //jQuery.proxy(context, name)的处理
             if (typeof context === "string") {
-                tmp = fn[context];
+                var tmp = fn[context];
                 context = fn;
                 fn = tmp;
             }
 
-            // Quick check to determine if target is callable, in the spec
-            // this throws a TypeError, but we will just return undefined.
+            //若fn不是函数则返回undefined
             if (!jQuery.isFunction(fn)) {
                 return undefined;
             }
 
-            // Simulated bind
-            args = slice.call(arguments, 2);
-            proxy = function () {
+            var args = slice.call(arguments, 2);        //得到additionalArguments
+
+            //新的函数实现
+            var proxy = function () {
+                //利用applay实现修改函数内this的指向
                 return fn.apply(context || this, args.concat(slice.call(arguments)));
             };
 
-            // Set the guid of unique handler to the same of original handler, so it can be removed
+            //使用guid标明两个函数之间的对应关系
+            //使得可以用原函数来取消绑定
             proxy.guid = fn.guid = fn.guid || jQuery.guid++;
 
             return proxy;
         },
 
-        now: Date.now,
-
-        // jQuery.support is not used in Core but other projects attach their
-        // properties to it so it needs to exist.
-        support: support
+        now: Date.now,              //当前UNIX时间戳
+        support: support            //浏览器能力检测
     });
 
+    //检测Symbol是否被浏览器支持
     if (typeof Symbol === "function") {
+        //[存疑]
         jQuery.fn[Symbol.iterator] = arr[Symbol.iterator];
     }
 
-// Populate the class2type map
-    jQuery.each("Boolean Number String Function Array Date RegExp Object Error Symbol".split(" "),
-        function (i, name) {
-            class2type["[object " + name + "]"] = name.toLowerCase();
-        });
+    //初始化class2type, 用于类型判别
+    //初始化后的形式: [object Array]:"array"
+    jQuery.each("Boolean Number String Function Array Date RegExp Object Error Symbol".split(" "), function (i, name) {
+        class2type["[object " + name + "]"] = name.toLowerCase();
+    });
 
+    //检查是否是数组或类数组对象
     function isArrayLike(obj) {
-
-        // Support: real iOS 8.2 only (not reproducible in simulator)
-        // `in` check used to prevent JIT error (gh-2145)
-        // hasOwn isn't used here due to false negatives
-        // regarding Nodelist length in IE
         var length = !!obj && "length" in obj && obj.length,
             type = jQuery.type(obj);
 
@@ -457,6 +435,7 @@ define(["./var/arr", "./var/document", "./var/getProto", "./var/slice", "./var/c
         }
 
         return type === "array" || length === 0 ||
+            //检查是否可以通过索引访问元素
             typeof length === "number" && length > 0 && ( length - 1 ) in obj;
     }
 
