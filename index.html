@@ -12,12 +12,7 @@
     <script>
         require.config({baseUrl: './src/'});
         require(['jquery'], function ($) {
-            var temp = {
-                length: 0
-            };
-            $.each(temp, function(){
-
-            })
+            $.parseHTML("<div class='test'><h1>Hello World</h1></div>");
         });
     </script>
 </body>
